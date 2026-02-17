@@ -1,0 +1,116 @@
+services:
+  # === Database Services (always start) ===
+  postgres:
+    image: postgres:16-alpine
+    container_name: proposal-creation-postgres
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-proposal_creation}
+      POSTGRES_USER: ${POSTGRES_USER:-proposal_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_pg_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      TZ: Asia/Tokyo
+    volumes:
+      - proposal-creation-pgdata:/var/lib/postgresql/data
+    networks:
+      - proposal-creation-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-proposal_user} -d ${POSTGRES_DB:-proposal_creation}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: proposal-creation-neo4j
+    restart: unless-stopped
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-changeme_neo4j_password}
+      NEO4J_PLUGINS: "[]"
+      NEO4J_server_memory_heap_initial__size: "256m"
+      NEO4J_server_memory_heap_max__size: "512m"
+      TZ: Asia/Tokyo
+    volumes:
+      - proposal-creation-neo4jdata:/data
+    networks:
+      - proposal-creation-net
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER:-neo4j} -p ${NEO4J_PASSWORD:-changeme_neo4j_password} 'RETURN 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # === Application Services (profile: full) ===
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: proposal-creation-backend
+    restart: unless-stopped
+    profiles: ["full"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: proposal-creation-postgres
+      POSTGRES_PORT: "5432"
+      NEO4J_URI: bolt://proposal-creation-neo4j:7687
+    volumes:
+      - ./backend:/app
+    networks:
+      - proposal-creation-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: proposal-creation-frontend
+    restart: unless-stopped
+    profiles: ["full"]
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - proposal-creation-net
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  proposal-creation-net:
+    driver: bridge
+    name: proposal-creation-net
+
+volumes:
+  proposal-creation-pgdata:
+    name: proposal-creation-pgdata
+  proposal-creation-neo4jdata:
+    name: proposal-creation-neo4jdata
