@@ -43,5 +43,8 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
+# Knowledge docs (large binaries, transfer via rsync)
+product_doc/
+
 # Claude Code
 .claude/

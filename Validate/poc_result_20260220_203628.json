@@ -1,0 +1,24 @@
+{
+  "case_id": "dc201776-5c74-4ff4-aaca-48f0c5f4c231",
+  "executed_at": "2026-02-20T11:36:28.029283+00:00",
+  "excel_file": "../Validate/Work_添付資料８.要求機能一覧.xlsx",
+  "total_requirements": 195,
+  "completed": 26,
+  "errors": 11,
+  "aborted": true,
+  "elapsed_seconds": 272.3,
+  "avg_seconds_per_requirement": 1.4,
+  "error_rate": 5.6,
+  "judgment_distribution": {
+    "対象外": 5,
+    "アドオン開発": 10,
+    "標準(業務変更含む)": 1,
+    "外部連携": 6,
+    "標準対応": 4
+  },
+  "confidence_distribution": {
+    "Low": 14,
+    "Medium": 8,
+    "High": 4
+  }
+}
