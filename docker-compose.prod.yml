@@ -2,7 +2,7 @@
 # 使い方: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full up -d --build
 services:
   backend:
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
     volumes:
       - /home/ec2-user/product_doc:/product_doc:ro
     restart: always
