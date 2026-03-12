@@ -9,7 +9,7 @@ services:
   frontend:
     build:
       args:
-        NEXT_PUBLIC_API_URL: http://${EC2_ELASTIC_IP}/api
+        NEXT_PUBLIC_API_URL: http://${EC2_ELASTIC_IP}/api/v1
     volumes: []
     restart: always
 

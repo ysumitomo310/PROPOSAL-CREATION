@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # ビルド時にAPIのURLを受け取る
-ARG NEXT_PUBLIC_API_URL=http://localhost/api
+ARG NEXT_PUBLIC_API_URL=http://localhost/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN pnpm run build
