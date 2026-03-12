@@ -1,0 +1,25 @@
+# 本番環境用オーバーライド
+# 使い方: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile full up -d --build
+services:
+  backend:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    volumes: []
+    restart: always
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: http://${EC2_ELASTIC_IP}/api
+    volumes: []
+    restart: always
+
+  postgres:
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"  # localhostのみ（外部非公開）
+
+  neo4j:
+    restart: always
+    ports:
+      - "127.0.0.1:7687:7687"  # localhostのみ（外部非公開）
+      - "7474:7474"             # Neo4j Browser（セキュリティグループで制限）

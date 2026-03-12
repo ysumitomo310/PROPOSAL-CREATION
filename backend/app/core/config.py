@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     MAPPING_MAX_CONCURRENCY: int = 5
     MAPPING_ERROR_THRESHOLD: float = 0.2
 
+    # === CORS ===
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
+
     @property
     def langsmith_enabled(self) -> bool:
         """LangSmith トレーシングが有効かどうか。"""
